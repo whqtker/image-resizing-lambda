@@ -1,5 +1,6 @@
 package org.ll.imageresizinglambda.domain.post.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.ll.imageresizinglambda.domain.post.entity.Post;
 import org.ll.imageresizinglambda.domain.post.repository.PostRepository;
@@ -36,5 +37,9 @@ public class PostService {
         }
 
         return imgUrl.replace("/images/", "/thumbnails/");
+    }
+
+    public List<Post> getPosts() {
+        return postRepository.findAll();
     }
 }

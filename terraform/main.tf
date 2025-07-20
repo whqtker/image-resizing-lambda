@@ -274,7 +274,6 @@ resource "aws_iam_role" "ec2_role" {
   assume_role_policy = data.aws_iam_policy_document.ec2_assume_role_policy.json
 }
 
-
 # EC2 role에 AmazonS3FullAccess 정책을 부착
 resource "aws_iam_role_policy_attachment" "s3_full_access" {
   role = aws_iam_role.ec2_role.name
@@ -288,8 +287,8 @@ resource "aws_iam_role_policy_attachment" "ec2_ssm" {
 }
 
 # IAM 인스턴스 프로파일 생성
-resource "aws_iam_instance_profile" "instance_profile_1" {
-  name = "${var.project_name}-instance-profile-1"
+resource "aws_iam_instance_profile" "instance_profile" {
+  name = "${var.project_name}-instance-profile"
   role = aws_iam_role.ec2_role.name
 }
 
@@ -297,6 +296,7 @@ resource "aws_iam_instance_profile" "instance_profile_1" {
 resource "aws_instance" "my-ec2" {
   ami = "ami-07eff2bc4837a9e01"
   instance_type = "t2.micro"
+  iam_instance_profile = aws_iam_instance_profile.instance_profile.name
 
   subnet_id = aws_subnet.public_a.id
   vpc_security_group_ids = [aws_security_group.my-sg.id]
@@ -306,14 +306,22 @@ resource "aws_instance" "my-ec2" {
   user_data = <<-EOF
               #!/bin/bash
               yum update -y
-              amazon-linux-extras install -y mysql8.0
-              systemctl start mysqld
-              systemctl enable mysqld
 
-              mysql -u root -e "CREATE DATABASE ${var.db_name};"
-              mysql -u root -e "CREATE USER '${var.db_user}'@'%' IDENTIFIED BY '${var.db_password}';"
-              mysql -u root -e "GRANT ALL PRIVILEGES ON ${var.db_name}.* TO '${var.db_user}'@'%';"
-              mysql -u root -e "FLUSH PRIVILEGES;"
+              yum install -y docker
+              systemctl start docker
+              systemctl enable docker
+
+              usermod -a -G docker ec2-user
+
+              docker run -d \
+                --name mysql-server \
+                -p 3306:3306 \
+                -e MYSQL_ROOT_PASSWORD=${var.db_password} \
+                -e MYSQL_DATABASE=${var.db_name} \
+                -e MYSQL_USER=${var.db_user} \
+                -e MYSQL_PASSWORD=${var.db_password} \
+                --restart=always \
+                mysql:8.0
               EOF
 
   tags = {

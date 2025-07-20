@@ -32,11 +32,18 @@ public class Post {
     @Column(name = "thumbnailUrl")
     private String thumbnailUrl;
 
-    @Column(name = "create_at", updatable = false, nullable = false)
+    @Column(name = "created_at", updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "update_at")
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    public Post(String title, String content, String imageUrl, String thumbnailUrl) {
+        this.title = title;
+        this.content = content;
+        this.imageUrl = imageUrl;
+        this.thumbnailUrl = thumbnailUrl;
+    }
 
     @PrePersist
     public void onCreate() {

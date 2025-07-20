@@ -36,3 +36,9 @@ out/
 ### VS Code ###
 .vscode/
 /src/main/resources/application-secret.yml
+/terraform/terraform.tfvars
+/terraform/.terraform.lock.hcl
+/terraform/.terraform/
+/terraform/terraform.tfstate
+/terraform/terraform.tfstate.backup
+/terraform/.terraform.tfstate.lock.info

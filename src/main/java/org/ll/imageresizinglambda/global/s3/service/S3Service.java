@@ -24,7 +24,7 @@ public class S3Service {
             return null;
         }
 
-        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        String fileName = "original/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
         ObjectMetadata metadata = new ObjectMetadata();
 
         metadata.setContentLength(file.getSize());

@@ -36,7 +36,7 @@ public class PostService {
             return null;
         }
 
-        return imgUrl.replace("/images/", "/thumbnails/");
+        return imgUrl.replace("/original/", "/thumbnails/");
     }
 
     public List<Post> getPosts() {

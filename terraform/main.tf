@@ -101,20 +101,14 @@ resource "aws_iam_role_policy" "lambda_policy" {
   policy = data.aws_iam_policy_document.lambda_policy_document.json
 }
 
-data "archive_file" "lambda_zip" {
-  type        = "zip"
-  source_file = "${path.module}/thumbnail-generator.zip"
-  output_path = "${path.module}/thumbnail-generator.zip"
-}
-
 # 람다 함수 생성
 resource "aws_lambda_function" "thumbnail_generator" {
-  filename         = data.archive_file.lambda_zip.output_path
+  filename         = "${path.module}/thumbnail-generator.zip"
   function_name    = "${var.project_name}-thumbnail-generator"
   role             = aws_iam_role.lambda_role.arn
   handler          = "thumbnail-generator.lambda_handler"
 
-  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+  source_code_hash = filebase64sha256("${path.module}/thumbnail-generator.zip")
 
   runtime          = "python3.9"
   timeout          = 30

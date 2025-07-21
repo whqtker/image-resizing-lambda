@@ -17,9 +17,8 @@ public class PostService {
 
     public void createPost(String title, String content, MultipartFile image) {
         String imgUrl = getImgUrl(image);
-        String thumbnailUrl = getThumbnailUrl(imgUrl);
 
-        Post post = new Post(title, content, imgUrl, thumbnailUrl);
+        Post post = new Post(title, content, imgUrl);
         postRepository.save(post);
     }
 
@@ -29,14 +28,6 @@ public class PostService {
         }
 
         return s3Service.uploadImage(image).imageUrl();
-    }
-
-    private String getThumbnailUrl(String imgUrl) {
-        if (imgUrl == null) {
-            return null;
-        }
-
-        return imgUrl.replace("/original/", "/thumbnails/");
     }
 
     public List<Post> getPosts() {

@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Transient;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,21 +30,16 @@ public class Post {
     @Column(name = "imageUrl")
     private String imageUrl;
 
-    @Column(name = "thumbnailUrl")
-    private String thumbnailUrl;
-
     @Column(name = "created_at", updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    public Post(String title, String content, String imageUrl, String thumbnailUrl) {
+    public Post(String title, String content, String imageUrl) {
         this.title = title;
         this.content = content;
-        this.imageUrl = imageUrl;
-        this.thumbnailUrl = thumbnailUrl;
-    }
+        this.imageUrl = imageUrl;}
 
     @PrePersist
     public void onCreate() {
@@ -57,4 +53,12 @@ public class Post {
         this.updatedAt = LocalDateTime.now();
     }
 
+    @Transient
+    public String getThumbnailUrl() {
+        if (this.imageUrl == null || this.imageUrl.isEmpty()) {
+            return null;
+        }
+
+        return this.imageUrl.replace("/original/", "/thumbnails/");
+    }
 }

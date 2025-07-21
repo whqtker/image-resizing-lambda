@@ -69,10 +69,10 @@
       <div class="card post-card h-100 shadow-sm">
         <!-- Thumbnail Image -->
         <div th:if="${post.thumbnailUrl}" class="text-center p-3">
-          <img th:src="${post.thumbnailUrl}"
+          <img th:data-src="${post.thumbnailUrl}"
+               src="https://via.placeholder.com/200x150/f0f0f0/cccccc?text=Processing..."
                th:alt="${post.title}"
-               class="thumbnail-img"
-               onerror="this.src='https://via.placeholder.com/200x150?text=No+Image'">
+               class="thumbnail-loader thumbnail-img">
         </div>
         <div th:unless="${post.thumbnailUrl}" class="text-center p-3">
           <img src="https://via.placeholder.com/200x150?text=No+Image"
@@ -172,5 +172,49 @@
 <!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://kit.fontawesome.com/your-fontawesome-kit.js"></script>
+<script>
+  /**
+   * 이미지 로더 함수
+   * @param {HTMLImageElement} imgElement - 로드할 이미지 DOM 요소
+   * @param {number} retryCount - 현재 재시도 횟수
+   */
+  function loadThumbnailWithRetry(imgElement, retryCount = 0) {
+    const realSrc = imgElement.dataset.src;
+    if (!realSrc) return; // 로드할 URL이 없으면 종료
+
+    const maxRetries = 5;     // 최대 5번 재시도
+    const retryDelay = 2000;  // 2초 간격
+
+    // 백그라운드에서 로드를 시도할 임시 이미지 객체 생성
+    const tempImage = new Image();
+    tempImage.src = realSrc;
+
+    // --- 로딩 성공 시 ---
+    tempImage.onload = () => {
+      // 화면의 이미지 src를 실제 썸네일 URL로 교체
+      imgElement.src = realSrc;
+    };
+
+    // --- 로딩 실패 시 ---
+    tempImage.onerror = () => {
+      // 재시도 횟수가 최대치 미만이면 다시 시도
+      if (retryCount < maxRetries) {
+        setTimeout(() => {
+          loadThumbnailWithRetry(imgElement, retryCount + 1);
+        }, retryDelay);
+      } else {
+        // 최대 재시도 횟수를 초과하면 최종 오류 이미지로 교체
+        imgElement.src = '<https://via.placeholder.com/200x150?text=Error'>[1];
+      }
+    };
+  }
+
+  // DOM이 준비되면 'thumbnail-loader' 클래스를 가진 모든 이미지에 대해 로딩 시작
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.thumbnail-loader').forEach(img => {
+      loadThumbnailWithRetry(img);
+    });
+  });
+</script>
 </body>
 </html>

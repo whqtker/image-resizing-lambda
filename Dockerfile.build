@@ -1,0 +1,22 @@
+# 1. AWS Lambda Python 3.9 공식 베이스 이미지 사용
+FROM public.ecr.aws/lambda/python:3.9
+
+# 2. 패키징에 필요한 zip 도구를 설치합니다.
+RUN yum install -y zip
+
+# 3. 컨테이너 내에서 작업할 디렉터리를 생성하고 이동합니다.
+WORKDIR /build_space
+
+# 4. 먼저 의존성 정의 파일만 복사합니다.
+COPY script/requirements.txt .
+
+# 5. 의존성을 설치합니다.
+RUN pip install -r requirements.txt -t .
+
+# 6. 나머지 소스 코드를 복사합니다.
+COPY script/thumbnail-generator.py .
+
+# 7. [핵심 수정] 컨테이너 실행 시 zip 압축 결과를 표준 출력(stdout)으로 내보내도록 설정
+#    'zip -r - .' 명령어는 현재 디렉터리('.')의 모든 파일을 재귀적으로(-r) 압축하여
+#    파일이 아닌 표준 출력(-)으로 보냅니다.
+CMD [ "zip", "-r", "-", "." ]
